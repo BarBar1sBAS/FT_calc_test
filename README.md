@@ -53,6 +53,8 @@ node --test calculator.test.mjs
 
 ## GitHub Pages
 
+Сайт: [открыть калькулятор](https://barbar1sbas.github.io/FT_calc_test/).
+
 Публикация настроена в `.github/workflows/pages.yml`: каждый push в `main` запускает тесты и развёртывание. В сайт попадают только HTML, CSS, JavaScript и assets; тесты и внутренняя документация не включаются в артефакт.
 
 Репозиторий: [BarBar1sBAS/FT_calc_test](https://github.com/BarBar1sBAS/FT_calc_test).
