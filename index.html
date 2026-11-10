@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f6f4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#181818" media="(prefers-color-scheme: dark)">
+  <title>Смета · Калькулятор стоимости сайта</title>
+  <meta name="description" content="Предварительная оценка стоимости и срока разработки сайта с прозрачной разбивкой по страницам, функциям и срочности.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./assets/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к калькулятору</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="brand"><span class="brand-mark" aria-hidden="true">с</span>смета</span>
+      <span class="header-caption">Рабочие инструменты агентства</span>
+    </div>
+  </header>
+
+  <main id="main" class="workspace" tabindex="-1">
+    <div class="intro">
+      <p class="eyebrow">Калькулятор проекта</p>
+      <h1>Сколько будет стоить сайт?</h1>
+      <p class="intro-description">Выберите параметры проекта. Стоимость и срок обновятся сразу.</p>
+    </div>
+
+    <div class="calculator-layout">
+      <form id="calculator" novalidate aria-label="Параметры проекта">
+        <div class="form-heading">
+          <h2>Параметры проекта</h2>
+          <button class="reset-button" type="reset">Сбросить</button>
+        </div>
+
+        <fieldset class="field-group">
+          <legend>Тип сайта</legend>
+          <div id="site-types" class="site-options"></div>
+        </fieldset>
+
+        <div class="field-group pages-group">
+          <div>
+            <label class="field-label" for="pages">Количество страниц</label>
+            <p id="pages-help" class="helper">У лендинга одна страница.</p>
+          </div>
+          <div class="page-control">
+            <input id="pages" name="pages" type="number" min="1" max="100" step="1" value="1" required disabled aria-describedby="pages-help pages-error">
+            <span class="unit-label" aria-hidden="true">стр.</span>
+          </div>
+          <p id="pages-error" class="field-error" hidden></p>
+        </div>
+
+        <fieldset class="field-group features-group">
+          <legend>Дополнительные функции</legend>
+          <p class="helper">Добавьте только то, что нужно проекту.</p>
+          <div id="features" class="feature-options"></div>
+        </fieldset>
+
+        <fieldset class="field-group urgency-group">
+          <legend>Срочность проекта</legend>
+          <label class="urgent-option" for="urgent">
+            <input id="urgent" name="urgent" type="checkbox">
+            <span class="option-copy"><span class="option-title">Нужно быстрее</span><span id="urgency-description" class="helper"></span></span>
+            <span id="urgency-rate" class="small-tag"></span>
+          </label>
+          <p class="helper urgency-help">Без ускорения работаем в обычном темпе.</p>
+        </fieldset>
+      </form>
+
+      <aside id="estimate" class="estimate" aria-labelledby="estimate-heading" aria-busy="true" tabindex="-1">
+        <div class="estimate-heading">
+          <h2 id="estimate-heading">Ваша оценка</h2>
+          <span class="estimate-tag">Предварительно</span>
+        </div>
+
+        <div id="skeleton" class="skeleton" role="status">
+          <span class="sr-only">Подготавливаем расчёт</span>
+          <span class="skeleton-line skeleton-price"></span>
+          <span class="skeleton-line"></span>
+          <span class="skeleton-line skeleton-short"></span>
+        </div>
+
+        <div id="estimate-content" hidden>
+          <div class="estimate-total">
+            <p class="helper">Примерная стоимость</p>
+            <p class="price"><span class="approx" aria-hidden="true">≈</span> <span id="total-price"></span></p>
+            <p class="duration"><span id="total-days"></span> <span id="days-label"></span></p>
+            <p class="helper">С момента старта проекта</p>
+          </div>
+
+          <div class="breakdown-section">
+            <h3>Из чего складывается</h3>
+            <dl id="breakdown" class="breakdown"></dl>
+            <p id="time-explanation" class="time-explanation helper"></p>
+          </div>
+          <p class="included-note">В базовую стоимость входят дизайн, адаптивная вёрстка и тестирование первой страницы.</p>
+        </div>
+
+        <div id="estimate-error" class="estimate-error" hidden>
+          <h3>Уточните количество страниц</h3>
+          <p class="helper">Введите целое число в допустимом диапазоне, и здесь появится обновлённая оценка.</p>
+        </div>
+
+        <div class="estimate-note">
+          <span class="note-symbol" aria-hidden="true">i</span>
+          <p>Тарифы демонстрационные. Итоговая стоимость и срок уточняются после обсуждения задачи.</p>
+        </div>
+        <p id="live-result" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      </aside>
+    </div>
+    <noscript><p class="noscript-note">Для расчёта включите JavaScript в настройках браузера и обновите страницу.</p></noscript>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-main">
+        <div class="footer-about">
+          <span class="brand"><span class="brand-mark" aria-hidden="true">с</span>смета</span>
+          <p>Понятная оценка сайта для первого разговора с клиентом.</p>
+        </div>
+        <nav class="footer-navigation" aria-label="Навигация внизу страницы">
+          <h2 class="footer-title">Калькулятор</h2>
+          <a href="#calculator">Параметры проекта</a>
+          <a href="#estimate">Ваша оценка</a>
+        </nav>
+        <div class="footer-disclaimer">
+          <h2 class="footer-title">О расчёте</h2>
+          <p>Демонстрационные тарифы. Финальную смету согласуйте после обсуждения задачи.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Смета</span>
+        <span>Работает локально. Данные не отправляются.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

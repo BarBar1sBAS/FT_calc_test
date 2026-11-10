@@ -46,6 +46,9 @@ test('функции независимы, исходные параметры �
 test('первая страница входит в базовую цену каждого типа', () => {
   assert.equal(calculateEstimate({ ...initial, siteType: 'corporate' }).price, 90_000);
   assert.equal(calculateEstimate({ ...initial, siteType: 'shop' }).price, 160_000);
+  const twoPages = calculateEstimate({ ...initial, siteType: 'corporate', pages: 2 });
+  assert.equal(twoPages.price, 95_000);
+  assert.equal(twoPages.days, 16);
 });
 
 test('невалидные значения страниц отвергаются без молчаливого округления', () => {

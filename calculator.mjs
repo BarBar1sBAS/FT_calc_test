@@ -15,17 +15,24 @@ export const TARIFFS = {
   urgency: { surcharge: 0.3, timeFactor: 0.75 },
 };
 
-export function calculateEstimate({ siteType, pages, features, urgent }) {
-  if (!Object.hasOwn(TARIFFS.sites, siteType)) throw new TypeError('Неизвестный тип сайта.');
-  const site = TARIFFS.sites[siteType];
-
+function validatePages(site, pages) {
   if (!Number.isInteger(pages) || pages < 1 || pages > TARIFFS.page.max) {
     throw new RangeError(`Количество страниц: целое число от 1 до ${TARIFFS.page.max}.`);
   }
   if (site.fixedPages && pages !== site.fixedPages) throw new RangeError('Лендинг содержит одну страницу.');
+}
+
+function validateFeatures(features) {
   if (!Array.isArray(features) || features.some(key => !Object.hasOwn(TARIFFS.features, key)) || new Set(features).size !== features.length) {
     throw new TypeError('Выберите известные функции без повторений.');
   }
+}
+
+export function calculateEstimate({ siteType, pages, features, urgent }) {
+  if (!Object.hasOwn(TARIFFS.sites, siteType)) throw new TypeError('Неизвестный тип сайта.');
+  const site = TARIFFS.sites[siteType];
+  validatePages(site, pages);
+  validateFeatures(features);
   if (typeof urgent !== 'boolean') throw new TypeError('Укажите срочность проекта.');
 
   const breakdown = [{ label: `${site.label}: первая страница`, price: site.price, days: site.days }];
