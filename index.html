@@ -39,7 +39,26 @@
 
         <fieldset class="field-group">
           <legend>Тип сайта</legend>
-          <div id="site-types" class="site-options"></div>
+          <div id="site-types" class="site-options">
+            <label class="site-option">
+              <input type="radio" name="siteType" value="landing" checked>
+              <span class="option-title">Лендинг</span>
+              <span class="helper">Одна страница для продукта или услуги</span>
+              <span class="site-price" data-site-price="landing"></span>
+            </label>
+            <label class="site-option">
+              <input type="radio" name="siteType" value="corporate">
+              <span class="option-title">Корпоративный сайт</span>
+              <span class="helper">Компания, услуги и информация о бизнесе</span>
+              <span class="site-price" data-site-price="corporate"></span>
+            </label>
+            <label class="site-option">
+              <input type="radio" name="siteType" value="shop">
+              <span class="option-title">Интернет-магазин</span>
+              <span class="helper">Витрина товаров для продаж в интернете</span>
+              <span class="site-price" data-site-price="shop"></span>
+            </label>
+          </div>
         </fieldset>
 
         <div class="field-group pages-group">
@@ -57,7 +76,28 @@
         <fieldset class="field-group features-group">
           <legend>Дополнительные функции</legend>
           <p class="helper">Добавьте только то, что нужно проекту.</p>
-          <div id="features" class="feature-options"></div>
+          <div id="features" class="feature-options">
+            <label class="feature-option">
+              <input type="checkbox" name="features" value="form">
+              <span class="option-copy"><span class="option-title">Форма заявки</span><span class="helper">Сбор контактов и запросов с сайта</span><span class="feature-price" data-feature-price="form"></span></span>
+            </label>
+            <label class="feature-option">
+              <input type="checkbox" name="features" value="catalog">
+              <span class="option-copy"><span class="option-title">Каталог</span><span class="helper">Карточки, категории и фильтры</span><span class="feature-price" data-feature-price="catalog"></span></span>
+            </label>
+            <label class="feature-option">
+              <input type="checkbox" name="features" value="payment">
+              <span class="option-copy"><span class="option-title">Онлайн-оплата</span><span class="helper">Подключение платёжного сервиса</span><span class="feature-price" data-feature-price="payment"></span></span>
+            </label>
+            <label class="feature-option">
+              <input type="checkbox" name="features" value="crm">
+              <span class="option-copy"><span class="option-title">Интеграция с CRM</span><span class="helper">Передача заявок в систему продаж</span><span class="feature-price" data-feature-price="crm"></span></span>
+            </label>
+            <label class="feature-option">
+              <input type="checkbox" name="features" value="languages">
+              <span class="option-copy"><span class="option-title">Мультиязычность</span><span class="helper">Две языковые версии сайта</span><span class="feature-price" data-feature-price="languages"></span></span>
+            </label>
+          </div>
         </fieldset>
 
         <fieldset class="field-group urgency-group">
@@ -134,7 +174,7 @@
       </div>
       <div class="footer-bottom">
         <span>© 2026 Смета</span>
-        <span>Работает локально. Данные не отправляются.</span>
+        <span>Вычисления в браузере. Параметры не отправляются.</span>
       </div>
     </div>
   </footer>

@@ -14,23 +14,12 @@ function dayLabel(days) {
 }
 
 function renderOptions() {
-  document.querySelector('#site-types').innerHTML = Object.entries(TARIFFS.sites).map(([key, site]) => `
-    <label class="site-option">
-      <input type="radio" name="siteType" value="${key}" ${key === 'landing' ? 'checked' : ''}>
-      <span class="option-title">${site.label}</span>
-      <span class="helper">${site.description}</span>
-      <span class="site-price">от ${money.format(site.price)}</span>
-    </label>`).join('');
-
-  document.querySelector('#features').innerHTML = Object.entries(TARIFFS.features).map(([key, feature]) => `
-    <label class="feature-option">
-      <input type="checkbox" name="features" value="${key}">
-      <span class="option-copy">
-        <span class="option-title">${feature.label}</span>
-        <span class="helper">${feature.description}</span>
-        <span class="feature-price">+${money.format(feature.price)}</span>
-      </span>
-    </label>`).join('');
+  for (const element of document.querySelectorAll('[data-site-price]')) {
+    element.textContent = `от ${money.format(TARIFFS.sites[element.dataset.sitePrice].price)}`;
+  }
+  for (const element of document.querySelectorAll('[data-feature-price]')) {
+    element.textContent = `+${money.format(TARIFFS.features[element.dataset.featurePrice].price)}`;
+  }
 
   pages.max = TARIFFS.page.max;
   document.querySelector('#urgency-rate').textContent = `+${TARIFFS.urgency.surcharge * 100}% к цене`;

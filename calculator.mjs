@@ -1,16 +1,16 @@
 export const TARIFFS = {
   sites: {
-    landing: { label: 'Лендинг', description: 'Одна страница для продукта или услуги', price: 45_000, days: 8, defaultPages: 1, fixedPages: 1 },
-    corporate: { label: 'Корпоративный сайт', description: 'Компания, услуги и информация о бизнесе', price: 90_000, days: 15, defaultPages: 5 },
-    shop: { label: 'Интернет-магазин', description: 'Витрина товаров для продаж в интернете', price: 160_000, days: 25, defaultPages: 10 },
+    landing: { label: 'Лендинг', price: 45_000, days: 8, defaultPages: 1, fixedPages: 1 },
+    corporate: { label: 'Корпоративный сайт', price: 90_000, days: 15, defaultPages: 5 },
+    shop: { label: 'Интернет-магазин', price: 160_000, days: 25, defaultPages: 10 },
   },
   page: { price: 5_000, days: 1, max: 100 },
   features: {
-    form: { label: 'Форма заявки', description: 'Сбор контактов и запросов с сайта', price: 5_000, days: 1 },
-    catalog: { label: 'Каталог', description: 'Карточки, категории и фильтры', price: 25_000, days: 4 },
-    payment: { label: 'Онлайн-оплата', description: 'Подключение платёжного сервиса', price: 20_000, days: 3 },
-    crm: { label: 'Интеграция с CRM', description: 'Передача заявок в систему продаж', price: 15_000, days: 2 },
-    languages: { label: 'Мультиязычность', description: 'Две языковые версии сайта', price: 20_000, days: 3 },
+    form: { label: 'Форма заявки', price: 5_000, days: 1 },
+    catalog: { label: 'Каталог', price: 25_000, days: 4 },
+    payment: { label: 'Онлайн-оплата', price: 20_000, days: 3 },
+    crm: { label: 'Интеграция с CRM', price: 15_000, days: 2 },
+    languages: { label: 'Мультиязычность', price: 20_000, days: 3 },
   },
   urgency: { surcharge: 0.3, timeFactor: 0.75 },
 };

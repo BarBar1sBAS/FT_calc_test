@@ -90,7 +90,7 @@ legend, .field-label { display: block; font-size: 14px; line-height: 20px; font-
 .site-option .option-title { min-height: 40px; }
 .site-option .helper { min-height: 48px; }
 .option-title { display: block; font-size: 14px; line-height: 20px; font-weight: 600; }
-.site-price { font-size: 12px; line-height: 16px; color: var(--accent); font-weight: 700; margin-top: auto; white-space: nowrap; }
+.site-price { font-size: 12px; line-height: 16px; min-height: 16px; color: var(--accent); font-weight: 700; margin-top: auto; white-space: nowrap; }
 .pages-group { display: grid; grid-template-columns: minmax(0, 1fr) 112px; align-items: center; gap: 8px 24px; }
 .pages-group .field-label { margin-bottom: 4px; }
 .pages-group .helper { max-width: 40ch; }
@@ -106,9 +106,10 @@ legend, .field-label { display: block; font-size: 14px; line-height: 20px; font-
 .feature-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px; margin-left: -12px; border-radius: 8px; cursor: pointer; }
 .feature-option:has(:checked) { background: var(--selection); }
 .option-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 4px; }
-.feature-price { font-size: 12px; line-height: 16px; color: var(--accent); font-weight: 600; }
+.feature-price { font-size: 12px; line-height: 16px; min-height: 16px; color: var(--accent); font-weight: 600; }
 .urgent-option { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; }
 .urgent-option:has(:checked) { border-color: var(--accent); background: var(--selection); }
+.urgent-option .helper { min-height: 16px; }
 .small-tag { padding: 4px 8px; background: var(--soft); border-radius: 4px; color: var(--text); font-size: 12px; line-height: 16px; white-space: nowrap; font-weight: 600; }
 .urgency-group { margin-bottom: 0; }
 .urgency-help { margin-top: 8px; }
