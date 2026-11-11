@@ -203,7 +203,7 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
     ensure(bounds.estimate <= bounds.footer, 'Смета перекрыла футер');
   });
 
-  await check('Обе темы, текст от 14px и отсутствие переполнения', async () => {
+  await check('Обе темы, компактный счётчик, текст от 14px и отсутствие переполнения', async () => {
     for (const theme of ['light', 'dark']) {
       await page.emulateMedia({ colorScheme: theme });
       for (const width of [320, 375, 640, 767, 768, 1024, 1440]) {
@@ -218,6 +218,19 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
         ensure(!problems.overflow, `Переполнение: ${theme}, ${width}px`);
         ensure(!problems.barOverflow, `Переполнение полоски: ${theme}, ${width}px`);
         ensure(problems.smallText.length === 0, `Мелкий текст: ${theme}, ${width}px`);
+        if (width < 768) {
+          const control = await page.locator('.page-control').boundingBox();
+          const group = await page.locator('.pages-group').boundingBox();
+          ensure(control.width === 208 && control.x === group.x, `Счётчик растянут или смещён: ${theme}, ${width}px`);
+          ensure(await page.locator('.unit-label').isHidden(), 'Лишняя подпись «стр.» на телефоне');
+          for (const value of ['1', '10', '100']) {
+            await page.locator('#pages').fill(value);
+            const input = await page.locator('#pages').evaluate(el => ({ width: el.offsetWidth, aligned: getComputedStyle(el).textAlign, overflow: el.scrollWidth > el.clientWidth }));
+            ensure(input.width === 96 && input.aligned === 'center' && !input.overflow, `Число ${value} не помещается по центру`);
+          }
+          await page.locator('#pages').focus();
+          ensure(await page.locator('#pages').evaluate(el => el.matches(':focus-visible') && getComputedStyle(el).outlineWidth === '2px'), 'Потерян клавиатурный фокус поля');
+        }
       }
     }
   });
