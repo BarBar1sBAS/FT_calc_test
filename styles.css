@@ -119,7 +119,8 @@ legend, .field-label { display: block; font-size: 14px; line-height: 20px; font-
 .urgency-group { margin-bottom: 0; }
 .urgency-help { margin-top: 8px; }
 
-.estimate { position: sticky; top: var(--estimate-top, 24px); max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; background: var(--surface); padding: 24px; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 24px oklch(25% 0.012 150 / 0.025); }
+.estimate, .mobile-summary { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 24px oklch(25% 0.012 150 / 0.025); }
+.estimate { position: sticky; top: var(--estimate-top, 24px); max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; padding: 24px; }
 .estimate-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; }
 .estimate-tag { color: var(--accent); font-size: 14px; line-height: 20px; }
 .estimate-total { padding-block: 24px; }
@@ -191,8 +192,8 @@ html:has(noscript .noscript-note) .skeleton { display: none; }
 }
 
 @media (max-width: 767px) {
-  html { scroll-padding-bottom: calc(var(--mobile-summary-height) + env(safe-area-inset-bottom) + 16px); }
-  body { padding-bottom: calc(var(--mobile-summary-height) + env(safe-area-inset-bottom)); }
+  html { scroll-padding-bottom: calc(var(--mobile-summary-height) + env(safe-area-inset-bottom) + 48px); }
+  body { padding-bottom: calc(var(--mobile-summary-height) + env(safe-area-inset-bottom) + 32px); }
   .header-inner, .workspace, .footer-inner { width: calc(100% - 32px); }
   .header-inner { min-height: 64px; }
   .header-caption { max-width: 16ch; text-align: right; }
@@ -203,9 +204,10 @@ html:has(noscript .noscript-note) .skeleton { display: none; }
   .calculator-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .estimate { position: static; max-height: none; overflow: visible; }
   .pages-group { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .mobile-summary { position: fixed; inset: auto 0 0; z-index: 1; display: grid; align-items: center; min-height: calc(var(--mobile-summary-height) + env(safe-area-inset-bottom)); padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px oklch(25% 0.012 150 / 0.05); }
-  .mobile-summary-values { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-  .mobile-price { color: var(--accent); font-size: 24px; line-height: 32px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 4px; }
+  .mobile-summary { position: fixed; inset: auto 16px calc(16px + env(safe-area-inset-bottom)); z-index: 1; display: grid; align-items: center; min-height: var(--mobile-summary-height); padding: 16px; opacity: 1; transform: translateY(0); visibility: visible; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), visibility 0s; }
+  .mobile-summary.is-concealed { opacity: 0; transform: translateY(8px); visibility: hidden; pointer-events: none; transition-delay: 0s, 0s, 200ms; }
+  .mobile-summary-values { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .mobile-price { color: var(--accent); font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.055em; font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 4px; }
   .mobile-term { text-align: right; }
   .mobile-days { font-size: 18px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; margin-top: 4px; }
   .mobile-summary-error { font-size: 16px; line-height: 24px; color: var(--error); }
@@ -221,4 +223,14 @@ html:has(noscript .noscript-note) .skeleton { display: none; }
   .urgent-option { flex-wrap: wrap; }
   .urgent-option .option-copy { flex-basis: 70%; }
   .urgent-option .small-tag { margin-left: 32px; }
+  .mobile-price { font-size: 20px; line-height: 28px; }
+  .mobile-days { font-size: 16px; line-height: 24px; }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .mobile-summary, .mobile-summary.is-concealed { transform: none; }
+}
+
+@media (max-width: 767px) {
+  html:has(:focus-visible) .mobile-summary { transform: none; transition: none; }
 }

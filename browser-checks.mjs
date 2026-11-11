@@ -18,17 +18,63 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
   }
 
   await page.setViewportSize({ width: 375, height: 812 });
-  await check('Мобильный итог закреплён в начале, середине и внизу страницы', async () => {
-    ensure(await page.locator('#mobile-summary').count() === 1, 'Нет мобильной полоски');
-    ensure(await page.locator('#mobile-summary').isVisible(), 'Полоска скрыта');
-    for (const fraction of [0, 0.5, 1]) {
-      await page.evaluate(value => window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * value), fraction);
-      const box = await page.locator('#mobile-summary').boundingBox();
-      ensure(Math.abs(box.y + box.height - 812) < 2, 'Полоска ушла за пределы окна');
-    }
+  async function floatingVisible(visible) {
+    await page.waitForFunction(expected => {
+      const card = document.querySelector('#mobile-summary');
+      const style = getComputedStyle(card);
+      return style.opacity === (expected ? '1' : '0') && card.getAttribute('aria-hidden') === String(!expected);
+    }, visible, { timeout: 3000 });
+  }
+  async function scrollToPrice(offset) {
+    await page.locator('#estimate .price').evaluate((el, value) => window.scrollTo(0, scrollY + el.getBoundingClientRect().top + value), offset);
+  }
+
+  await check('Плавающая карточка соответствует смете и не закрывает футер', async () => {
+    const shape = await page.locator('#mobile-summary').evaluate(el => ({ radius: getComputedStyle(el).borderRadius, border: getComputedStyle(el).borderBottomWidth }));
+    ensure(shape.radius === '16px' && shape.border === '1px', 'Карточка квадратная или без полной рамки');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await floatingVisible(true);
+    const box = await page.locator('#mobile-summary').boundingBox();
+    ensure(box.x === 16 && box.width === 343 && Math.abs(box.y + box.height - 796) < 2, 'Неверные отступы карточки');
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await floatingVisible(true);
     const footer = await page.locator('.footer-bottom').boundingBox();
     const bar = await page.locator('#mobile-summary').boundingBox();
-    ensure(footer.y + footer.height <= bar.y + 1, 'Полоска перекрывает футер');
+    ensure(footer.y + footer.height <= bar.y + 1, 'Карточка перекрывает футер');
+  });
+
+  await check('Итоги плавно сменяют друг друга без дублирования и скачка страницы', async () => {
+    await scrollToPrice(-100);
+    await page.waitForTimeout(100);
+    ensure(await page.locator('#mobile-summary').getAttribute('aria-hidden') === 'true', 'Основной итог виден, но закреплённый не скрывается');
+    await floatingVisible(false);
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    ensure(await page.locator('#mobile-summary').evaluate(el => !el.hidden && el.inert), 'Скрытая карточка удалена из DOM или доступна для взаимодействия');
+    const motion = await page.locator('#estimate .price').evaluate(el => ({ transform: getComputedStyle(el).transform, opacity: getComputedStyle(el).opacity }));
+    ensure(motion.transform === 'none' && motion.opacity === '1', 'Основная цена анимируется');
+
+    // 95% visibility keeps the hidden state; 85% brings the floating estimate back.
+    const priceHeight = await page.locator('#estimate .price').evaluate(el => el.offsetHeight);
+    await scrollToPrice(priceHeight * 0.05);
+    await page.waitForTimeout(100);
+    ensure(await page.locator('#mobile-summary').getAttribute('aria-hidden') === 'true', 'Нет защитного порога от мигания');
+    await scrollToPrice(priceHeight * 0.15);
+    await floatingVisible(true);
+    ensure(await page.evaluate(() => document.documentElement.scrollHeight) === height, 'Изменилась длина страницы');
+
+    for (const offset of [-100, 20, -100, 20, -100]) {
+      await scrollToPrice(offset);
+      await page.waitForTimeout(30);
+    }
+    await floatingVisible(false);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await floatingVisible(true);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await scrollToPrice(-100);
+    await floatingVisible(false);
+    ensure(await page.locator('#mobile-summary').evaluate(el => getComputedStyle(el).transform === 'none'), 'Reduced motion сохраняет смещение');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
   });
 
   await check('Кнопки страниц, границы, ошибки и синхронный итог', async () => {
@@ -71,6 +117,25 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
     ensure((await page.locator('#mobile-price').innerText()).replace(/\s/g, '') === '≈45000₽', 'Сброс не обновил полоску');
   });
 
+  await check('Ошибки, прямой якорь и клавиатурный переход учитывают основной итог', async () => {
+    await page.locator('[name=siteType][value=corporate]').check();
+    await page.locator('#pages').fill('');
+    await page.locator('#estimate-error').evaluate(el => window.scrollTo(0, scrollY + el.getBoundingClientRect().top - 100));
+    await floatingVisible(false);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await floatingVisible(true);
+    await page.locator('#pages').fill('5');
+    await page.goto(url + '#estimate');
+    await page.waitForFunction(() => document.querySelector('#estimate').getAttribute('aria-busy') === 'false');
+    await floatingVisible(false);
+    const link = page.getByRole('link', { name: 'Ваша оценка', exact: true });
+    await link.focus();
+    await page.keyboard.press('Enter');
+    await floatingVisible(false);
+    const transition = await page.locator('#mobile-summary').evaluate(el => getComputedStyle(el).transitionDuration);
+    ensure(transition.split(',').every(value => parseFloat(value) === 0), 'Клавиатурный переход анимируется');
+  });
+
   await check('Смета на ПК прилипает по центру, длинная смета доступна', async () => {
     for (const width of [900, 1280, 1440]) {
       await page.setViewportSize({ width, height: 900 });
@@ -105,8 +170,10 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
   await check('Обе темы, текст от 14px и отсутствие переполнения', async () => {
     for (const theme of ['light', 'dark']) {
       await page.emulateMedia({ colorScheme: theme });
-      for (const width of [320, 375, 640, 768, 1024, 1440]) {
+      for (const width of [320, 375, 640, 767, 768, 1024, 1440]) {
         await page.setViewportSize({ width, height: 900 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        if (width < 768) await floatingVisible(true);
         const problems = await page.evaluate(() => ({
           overflow: document.documentElement.scrollWidth > innerWidth,
           barOverflow: document.querySelector('#mobile-summary').checkVisibility() && document.querySelector('#mobile-summary').scrollWidth > document.querySelector('#mobile-summary').clientWidth,

@@ -11,6 +11,11 @@ const plus = document.querySelector('#pages-plus');
 const mobileSummary = document.querySelector('#mobile-summary');
 const mobileValues = document.querySelector('#mobile-summary-values');
 const mobileError = document.querySelector('#mobile-summary-error');
+const estimatePrice = aside.querySelector('.price');
+const estimateDuration = aside.querySelector('.duration');
+const estimateError = document.querySelector('#estimate-error');
+const mobileLayout = window.matchMedia('(max-width: 767px)');
+let visibilityObserver;
 const money = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
 const plurals = new Intl.PluralRules('ru');
 
@@ -78,7 +83,7 @@ function updateEstimate() {
     pages.removeAttribute('aria-invalid');
     error.hidden = true;
     content.hidden = false;
-    document.querySelector('#estimate-error').hidden = true;
+    estimateError.hidden = true;
     mobileValues.hidden = false;
     mobileError.hidden = true;
   } catch (cause) {
@@ -86,7 +91,7 @@ function updateEstimate() {
     error.textContent = cause.message;
     error.hidden = false;
     content.hidden = true;
-    document.querySelector('#estimate-error').hidden = false;
+    estimateError.hidden = false;
     mobileValues.hidden = true;
     mobileError.hidden = false;
     liveResult.textContent = `${cause.message} Расчёт временно скрыт.`;
@@ -97,6 +102,36 @@ function updateEstimate() {
   mobileSummary.hidden = false;
   minus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber <= Number(pages.min));
   plus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber >= Number(pages.max));
+  watchEstimateVisibility();
+}
+
+function showFloatingEstimate(visible) {
+  mobileSummary.classList.toggle('is-concealed', !visible);
+  mobileSummary.setAttribute('aria-hidden', String(!visible));
+  mobileSummary.inert = !visible;
+}
+
+function watchEstimateVisibility() {
+  visibilityObserver?.disconnect();
+  if (!mobileLayout.matches) {
+    showFloatingEstimate(false);
+    return;
+  }
+
+  const targets = content.hidden ? [estimateError] : [estimatePrice, estimateDuration];
+  const ratios = new Map(targets.map(target => [target, 0]));
+  // Keep this boundary constant while the card fades, avoiding feedback loops.
+  const coveredBottom = Math.ceil(mobileSummary.offsetHeight + parseFloat(getComputedStyle(mobileSummary).bottom));
+  const observer = new IntersectionObserver(entries => {
+    if (visibilityObserver !== observer) return;
+    for (const entry of entries) ratios.set(entry.target, entry.intersectionRatio);
+    const visibility = [...ratios.values()];
+    if (visibility.every(ratio => ratio >= 1)) showFloatingEstimate(false);
+    else if (visibility.some(ratio => ratio <= 0.9)) showFloatingEstimate(true);
+  }, { rootMargin: `0px 0px -${coveredBottom}px 0px`, threshold: [0, 0.9, 1] });
+
+  visibilityObserver = observer;
+  for (const target of targets) observer.observe(target);
 }
 
 function changePages(direction) {
@@ -115,7 +150,10 @@ renderOptions();
 setPageDefaults();
 updateEstimate();
 new ResizeObserver(centerEstimate).observe(aside);
+new ResizeObserver(watchEstimateVisibility).observe(mobileSummary);
 window.addEventListener('resize', centerEstimate);
+window.addEventListener('resize', watchEstimateVisibility);
+mobileLayout.addEventListener('change', watchEstimateVisibility);
 minus.addEventListener('click', () => changePages(-1));
 plus.addEventListener('click', () => changePages(1));
 
