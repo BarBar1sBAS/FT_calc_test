@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#f4f6f4" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#181818" media="(prefers-color-scheme: dark)">
@@ -67,8 +67,12 @@
             <p id="pages-help" class="helper">У лендинга одна страница.</p>
           </div>
           <div class="page-control">
-            <input id="pages" name="pages" type="number" min="1" max="100" step="1" value="1" required disabled aria-describedby="pages-help pages-error">
-            <span class="unit-label" aria-hidden="true">стр.</span>
+            <button id="pages-minus" class="page-step" type="button" aria-label="Уменьшить количество страниц" aria-controls="pages" disabled>−</button>
+            <div class="page-input">
+              <input id="pages" name="pages" type="number" inputmode="numeric" min="1" max="100" step="1" value="1" required disabled aria-describedby="pages-help pages-error">
+              <span class="unit-label" aria-hidden="true">стр.</span>
+            </div>
+            <button id="pages-plus" class="page-step" type="button" aria-label="Увеличить количество страниц" aria-controls="pages" disabled>+</button>
           </div>
           <p id="pages-error" class="field-error" hidden></p>
         </div>
@@ -178,5 +182,19 @@
       </div>
     </div>
   </footer>
+
+  <aside id="mobile-summary" class="mobile-summary" aria-label="Краткая оценка проекта" hidden>
+    <div id="mobile-summary-values" class="mobile-summary-values">
+      <div>
+        <p class="helper">Стоимость</p>
+        <p id="mobile-price" class="mobile-price"></p>
+      </div>
+      <div class="mobile-term">
+        <p class="helper">Срок</p>
+        <p id="mobile-days" class="mobile-days"></p>
+      </div>
+    </div>
+    <p id="mobile-summary-error" class="mobile-summary-error" hidden>Уточните число страниц</p>
+  </aside>
 </body>
 </html>

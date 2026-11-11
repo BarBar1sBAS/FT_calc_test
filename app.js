@@ -6,6 +6,11 @@ const aside = document.querySelector('.estimate');
 const content = document.querySelector('#estimate-content');
 const error = document.querySelector('#pages-error');
 const liveResult = document.querySelector('#live-result');
+const minus = document.querySelector('#pages-minus');
+const plus = document.querySelector('#pages-plus');
+const mobileSummary = document.querySelector('#mobile-summary');
+const mobileValues = document.querySelector('#mobile-summary-values');
+const mobileError = document.querySelector('#mobile-summary-error');
 const money = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 });
 const plurals = new Intl.PluralRules('ru');
 
@@ -39,6 +44,8 @@ function renderEstimate(result, urgent) {
   document.querySelector('#total-price').textContent = money.format(result.price);
   document.querySelector('#total-days').textContent = result.days;
   document.querySelector('#days-label').textContent = dayLabel(result.days);
+  document.querySelector('#mobile-price').textContent = `≈ ${money.format(result.price)}`;
+  document.querySelector('#mobile-days').textContent = `${result.days} раб. дн.`;
   document.querySelector('#breakdown').replaceChildren(...result.breakdown.map(item => {
     const row = document.createElement('div');
     row.className = 'breakdown-row';
@@ -72,21 +79,45 @@ function updateEstimate() {
     error.hidden = true;
     content.hidden = false;
     document.querySelector('#estimate-error').hidden = true;
+    mobileValues.hidden = false;
+    mobileError.hidden = true;
   } catch (cause) {
     pages.setAttribute('aria-invalid', 'true');
     error.textContent = cause.message;
     error.hidden = false;
     content.hidden = true;
     document.querySelector('#estimate-error').hidden = false;
+    mobileValues.hidden = true;
+    mobileError.hidden = false;
     liveResult.textContent = `${cause.message} Расчёт временно скрыт.`;
   }
   document.querySelector('#skeleton').hidden = true;
   aside.setAttribute('aria-busy', 'false');
+  aside.scrollTop = 0;
+  mobileSummary.hidden = false;
+  minus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber <= Number(pages.min));
+  plus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber >= Number(pages.max));
+}
+
+function changePages(direction) {
+  if (!pages.validity.valid) pages.value = pages.min;
+  else if (direction < 0) pages.stepDown();
+  else pages.stepUp();
+  pages.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function centerEstimate() {
+  const offset = Math.max(24, (window.innerHeight - aside.offsetHeight) / 2);
+  aside.style.setProperty('--estimate-top', `${Math.round(offset)}px`);
 }
 
 renderOptions();
 setPageDefaults();
 updateEstimate();
+new ResizeObserver(centerEstimate).observe(aside);
+window.addEventListener('resize', centerEstimate);
+minus.addEventListener('click', () => changePages(-1));
+plus.addEventListener('click', () => changePages(1));
 
 form.addEventListener('input', event => {
   if (event.target.name === 'siteType') setPageDefaults();
