@@ -8,6 +8,8 @@ const error = document.querySelector('#pages-error');
 const liveResult = document.querySelector('#live-result');
 const minus = document.querySelector('#pages-minus');
 const plus = document.querySelector('#pages-plus');
+const pageNotice = document.querySelector('#pages-notice');
+let pageNoticeTimer;
 const mobileSummary = document.querySelector('#mobile-summary');
 const mobileValues = document.querySelector('#mobile-summary-values');
 const mobileError = document.querySelector('#mobile-summary-error');
@@ -37,6 +39,7 @@ function renderOptions() {
 }
 
 function setPageDefaults() {
+  clearPageNotice();
   const site = TARIFFS.sites[form.elements.siteType.value];
   pages.value = site.defaultPages;
   pages.disabled = Boolean(site.fixedPages);
@@ -101,7 +104,7 @@ function updateEstimate() {
   aside.scrollTop = 0;
   mobileSummary.hidden = false;
   minus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber <= Number(pages.min));
-  plus.disabled = pages.disabled || (pages.validity.valid && pages.valueAsNumber >= Number(pages.max));
+  plus.disabled = pages.validity.valid && pages.valueAsNumber >= Number(pages.max);
   watchEstimateVisibility();
 }
 
@@ -134,7 +137,24 @@ function watchEstimateVisibility() {
   for (const target of targets) observer.observe(target);
 }
 
+function clearPageNotice() {
+  clearTimeout(pageNoticeTimer);
+  pageNotice.hidden = true;
+  plus.classList.remove('has-notice');
+  plus.setAttribute('aria-describedby', 'pages-help');
+  if (liveResult.textContent === pageNotice.textContent) liveResult.textContent = '';
+}
+
 function changePages(direction) {
+  if (pages.disabled) {
+    clearPageNotice();
+    pageNotice.hidden = false;
+    plus.classList.add('has-notice');
+    plus.setAttribute('aria-describedby', 'pages-help pages-notice');
+    liveResult.textContent = pageNotice.textContent;
+    pageNoticeTimer = setTimeout(clearPageNotice, 5000);
+    return;
+  }
   if (!pages.validity.valid) pages.value = pages.min;
   else if (direction < 0) pages.stepDown();
   else pages.stepUp();

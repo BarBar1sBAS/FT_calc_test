@@ -72,8 +72,9 @@
               <input id="pages" name="pages" type="number" inputmode="numeric" min="1" max="100" step="1" value="1" required disabled aria-describedby="pages-help pages-error">
               <span class="unit-label" aria-hidden="true">стр.</span>
             </div>
-            <button id="pages-plus" class="page-step" type="button" aria-label="Увеличить количество страниц" aria-controls="pages" disabled>+</button>
+            <button id="pages-plus" class="page-step" type="button" aria-label="Увеличить количество страниц" aria-controls="pages" aria-describedby="pages-help" disabled>+</button>
           </div>
+          <p id="pages-notice" class="field-error" hidden>Лендинг состоит из одной страницы. Для нескольких страниц выберите корпоративный сайт или интернет-магазин</p>
           <p id="pages-error" class="field-error" hidden></p>
         </div>
 

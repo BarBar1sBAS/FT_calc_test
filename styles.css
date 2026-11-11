@@ -100,6 +100,7 @@ legend, .field-label { display: block; font-size: 14px; line-height: 20px; font-
 .page-input { position: relative; min-width: 0; }
 .page-step { min-width: 48px; min-height: 48px; border: 1px solid var(--control-border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 24px; line-height: 32px; }
 .page-step:disabled { color: var(--muted); background: var(--soft); border-color: var(--line); cursor: not-allowed; }
+#pages-plus.has-notice { color: var(--error); border-color: var(--error); }
 #pages { width: 100%; min-height: 48px; border: 1px solid var(--control-border); border-radius: 8px; padding: 8px 40px 8px 12px; background: var(--surface); color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; appearance: textfield; -moz-appearance: textfield; }
 #pages::-webkit-inner-spin-button, #pages::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 #pages:disabled { background: var(--soft); color: var(--muted); opacity: 1; cursor: not-allowed; }

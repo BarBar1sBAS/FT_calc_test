@@ -77,12 +77,48 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
   });
 
+  await check('Плюс у лендинга объясняет ограничение и убирает подсказку через 5 секунд', async () => {
+    const plus = page.locator('#pages-plus');
+    const notice = page.locator('#pages-notice');
+    ensure(await plus.isEnabled(), 'Плюс лендинга не принимает нажатие');
+    const original = await page.locator('#estimate-content').innerText();
+    const mobileOriginal = await page.locator('#mobile-summary-values').textContent();
+    await plus.click();
+    ensure(await notice.isVisible(), 'Нет пояснения ограничения');
+    ensure(await notice.innerText() === 'Лендинг состоит из одной страницы. Для нескольких страниц выберите корпоративный сайт или интернет-магазин', 'Неверный текст пояснения');
+    ensure(await plus.getAttribute('aria-describedby') === 'pages-help pages-notice', 'Пояснение не связано с кнопкой');
+    ensure(await page.locator('#live-result').innerText() === await notice.innerText(), 'Пояснение не озвучивается');
+    ensure(await page.locator('[aria-live]').count() === 1, 'Появился второй aria-live');
+    ensure(await page.locator('#pages').inputValue() === '1' && await page.locator('#pages').isDisabled(), 'Изменилось число страниц лендинга');
+    ensure(await page.locator('#pages').getAttribute('aria-invalid') === null, 'Корректная страница отмечена ошибочной');
+    ensure(await page.locator('#estimate-content').innerText() === original && await page.locator('#mobile-summary-values').textContent() === mobileOriginal, 'Предупреждение изменило смету');
+    await page.waitForTimeout(3100);
+    await plus.press('Enter');
+    await page.waitForTimeout(2100);
+    ensure(await notice.isVisible(), 'Повторное нажатие не продлило подсказку');
+    await page.waitForTimeout(3100);
+    ensure(await notice.isHidden(), 'Подсказка не исчезла через 5 секунд');
+    ensure(await plus.getAttribute('aria-describedby') === 'pages-help', 'Скрытая подсказка осталась в описании');
+    ensure(await page.locator('#live-result').textContent() === '', 'Скрытая подсказка осталась в aria-live');
+    await plus.press('Space');
+    ensure(await notice.isVisible(), 'Space не показывает подсказку');
+    await page.locator('[name=siteType][value=corporate]').check();
+    ensure(await notice.isHidden(), 'Смена типа оставила подсказку');
+    await page.waitForTimeout(5100);
+    ensure((await page.locator('#pages-help').innerText()).includes('Каждая следующая'), 'Старый таймер изменил подпись нового типа');
+    await page.locator('[name=siteType][value=landing]').check();
+    await plus.click();
+    await page.getByRole('button', { name: 'Сбросить' }).click();
+    await page.waitForFunction(() => document.querySelector('#pages-notice').hidden);
+    ensure(await plus.isEnabled() && !await plus.evaluate(el => el.classList.contains('has-notice')), 'Сброс оставил выделение или отключил плюс');
+  });
+
   await check('Кнопки страниц, границы, ошибки и синхронный итог', async () => {
     const minus = page.getByRole('button', { name: 'Уменьшить количество страниц' });
     const plus = page.getByRole('button', { name: 'Увеличить количество страниц' });
     ensure(await minus.count() === 1, 'Нет кнопки уменьшения');
     ensure(await plus.count() === 1, 'Нет кнопки увеличения');
-    ensure(await minus.isDisabled() && await plus.isDisabled(), 'Кнопки лендинга активны');
+    ensure(await minus.isDisabled() && await plus.isEnabled(), 'Неверные состояния кнопок лендинга');
     await page.locator('[name=siteType][value=corporate]').check();
     await plus.click();
     ensure(await page.locator('#pages').inputValue() === '6', 'Плюс не увеличил страницы');
@@ -113,7 +149,7 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
     ensure(await page.locator('#mobile-days').innerText() === '16 раб. дн.', 'Срок срочного проекта неверен');
     await page.getByRole('button', { name: 'Сбросить' }).click();
     await page.waitForFunction(() => document.querySelector('#pages').disabled && document.querySelector('#total-days').textContent === '8');
-    ensure(await minus.isDisabled() && await plus.isDisabled(), 'Сброс не отключил кнопки');
+    ensure(await minus.isDisabled() && await plus.isEnabled(), 'Сброс не восстановил кнопки лендинга');
     ensure((await page.locator('#mobile-price').innerText()).replace(/\s/g, '') === '≈45000₽', 'Сброс не обновил полоску');
   });
 
