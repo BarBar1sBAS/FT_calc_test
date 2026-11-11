@@ -203,7 +203,7 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
     ensure(bounds.estimate <= bounds.footer, 'Смета перекрыла футер');
   });
 
-  await check('Обе темы, компактный счётчик, текст от 14px и отсутствие переполнения', async () => {
+  await check('Обе темы, поле по центру и равномерные интервалы, текст от 14px и отсутствие переполнения', async () => {
     for (const theme of ['light', 'dark']) {
       await page.emulateMedia({ colorScheme: theme });
       for (const width of [320, 375, 640, 767, 768, 1024, 1440]) {
@@ -221,7 +221,13 @@ export async function runBrowserChecks(page, url = 'http://127.0.0.1:8000/') {
         if (width < 768) {
           const control = await page.locator('.page-control').boundingBox();
           const group = await page.locator('.pages-group').boundingBox();
-          ensure(control.width === 208 && control.x === group.x, `Счётчик растянут или смещён: ${theme}, ${width}px`);
+          const inputBox = await page.locator('#pages').boundingBox();
+          const minusBox = await page.locator('#pages-minus').boundingBox();
+          const plusBox = await page.locator('#pages-plus').boundingBox();
+          ensure(control.width === group.width && control.x === group.x, `Кнопки не разнесены по строке: ${theme}, ${width}px`);
+          ensure(Math.abs(inputBox.x + inputBox.width / 2 - group.x - group.width / 2) < 1, 'Поле не по центру');
+          const spaces = [minusBox.x - control.x, inputBox.x - minusBox.x - minusBox.width, plusBox.x - inputBox.x - inputBox.width, control.x + control.width - plusBox.x - plusBox.width];
+          ensure(Math.max(...spaces) - Math.min(...spaces) < 1 && minusBox.width === 48 && plusBox.width === 48, 'Интервалы не равны или кнопки уменьшились');
           ensure(await page.locator('.unit-label').isHidden(), 'Лишняя подпись «стр.» на телефоне');
           for (const value of ['1', '10', '100']) {
             await page.locator('#pages').fill(value);

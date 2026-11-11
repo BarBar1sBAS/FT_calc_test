@@ -205,7 +205,7 @@ html:has(noscript .noscript-note) .skeleton { display: none; }
   .calculator-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .estimate { position: static; max-height: none; overflow: visible; }
   .pages-group { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .page-control { width: 208px; max-width: 100%; justify-self: start; }
+  .page-control { grid-template-columns: 48px 96px 48px; justify-content: space-evenly; gap: 0; }
   #pages { padding-inline: 12px; text-align: center; }
   .unit-label { display: none; }
   .mobile-summary { position: fixed; inset: auto 16px calc(16px + env(safe-area-inset-bottom)); z-index: 1; display: grid; align-items: center; min-height: var(--mobile-summary-height); padding: 16px; opacity: 1; transform: translateY(0); visibility: visible; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), visibility 0s; }
